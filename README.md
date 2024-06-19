@@ -1,86 +1,92 @@
-# Table of Contents
-- [Docker Compose v2](#docker-compose-v2)
-- [Where to get Docker Compose](#where-to-get-docker-compose)
-    + [Windows and macOS](#windows-and-macos)
-    + [Linux](#linux)
-- [Quick Start](#quick-start)
-- [Contributing](#contributing)
-- [Legacy](#legacy)
-# Docker Compose v2
 
-[![GitHub release](https://img.shields.io/github/release/docker/compose.svg?style=flat-square)](https://github.com/docker/compose/releases/latest)
-[![PkgGoDev](https://img.shields.io/badge/go.dev-docs-007d9c?style=flat-square&logo=go&logoColor=white)](https://pkg.go.dev/github.com/docker/compose/v2)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/docker/compose/ci.yml?label=ci&logo=github&style=flat-square)](https://github.com/docker/compose/actions?query=workflow%3Aci)
-[![Go Report Card](https://goreportcard.com/badge/github.com/docker/compose/v2?style=flat-square)](https://goreportcard.com/report/github.com/docker/compose/v2)
-[![Codecov](https://codecov.io/gh/docker/compose/branch/main/graph/badge.svg?token=HP3K4Y4ctu)](https://codecov.io/gh/docker/compose)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/docker/compose/badge)](https://api.securityscorecards.dev/projects/github.com/docker/compose)
-![Docker Compose](logo.png?raw=true "Docker Compose Logo")
+### Prerequisites
 
-Docker Compose is a tool for running multi-container applications on Docker
-defined using the [Compose file format](https://compose-spec.io).
-A Compose file is used to define how one or more containers that make up
-your application are configured.
-Once you have a Compose file, you can create and start your application with a
-single command: `docker compose up`.
+* Windows:
+  * [Docker Desktop](https://hub.docker.com/editions/community/docker-ce-desktop-windows)
+  * make
+* macOS:
+  * [Docker Desktop](https://hub.docker.com/editions/community/docker-ce-desktop-mac)
+  * make
+* Linux:
+  * [Docker 20.10 or later](https://docs.docker.com/engine/install/)
+  * make
 
-# Where to get Docker Compose
+### Building the CLI
 
-### Windows and macOS
+Once you have the prerequisites installed, you can build the CLI using:
 
-Docker Compose is included in
-[Docker Desktop](https://www.docker.com/products/docker-desktop)
-for Windows and macOS.
-
-### Linux
-
-You can download Docker Compose binaries from the
-[release page](https://github.com/docker/compose/releases) on this repository.
-
-Rename the relevant binary for your OS to `docker-compose` and copy it to `$HOME/.docker/cli-plugins`
-
-Or copy it into one of these folders to install it system-wide:
-
-* `/usr/local/lib/docker/cli-plugins` OR `/usr/local/libexec/docker/cli-plugins`
-* `/usr/lib/docker/cli-plugins` OR `/usr/libexec/docker/cli-plugins`
-
-(might require making the downloaded file executable with `chmod +x`)
-
-
-Quick Start
------------
-
-Using Docker Compose is a three-step process:
-1. Define your app's environment with a `Dockerfile` so it can be
-   reproduced anywhere.
-2. Define the services that make up your app in `compose.yaml` so
-   they can be run together in an isolated environment.
-3. Lastly, run `docker compose up` and Compose will start and run your entire
-   app.
-
-A Compose file looks like this:
-
-```yaml
-services:
-  web:
-    build: .
-    ports:
-      - "5000:5000"
-    volumes:
-      - .:/code
-  redis:
-    image: redis
+```console
+make
 ```
 
-Contributing
-------------
+This will output a `docker-compose` CLI plugin for your host machine in
+`./bin/build`.
 
-Want to help develop Docker Compose? Check out our
-[contributing documentation](CONTRIBUTING.md).
+You can statically cross compile the CLI for Windows, macOS, and Linux using the
+`cross` target.
 
-If you find an issue, please report it on the
-[issue tracker](https://github.com/docker/compose/issues/new/choose).
+### Unit tests
 
-Legacy
--------------
+To run all of the unit tests, run:
 
-The Python version of Compose is available under the `v1` [branch](https://github.com/docker/compose/tree/v1).
+```console
+make test
+```
+
+If you need to update a golden file simply do `go test ./... -test.update-golden`.
+
+### End-to-end tests
+To run e2e tests, the Compose CLI binary needs to be built. All the commands to run e2e tests propose a version
+with the prefix `build-and-e2e` to first build the CLI before executing tests.
+
+Note that this requires a local Docker Engine to be running.
+
+#### Whole end-to-end tests suite
+
+To execute both CLI and standalone e2e tests, run :
+
+```console
+make e2e
+```
+
+Or if you need to build the CLI, run: 
+```console
+make build-and-e2e
+```
+
+#### Plugin end-to-end tests suite
+
+To execute CLI plugin e2e tests, run :
+
+```console
+make e2e-compose
+```
+
+Or if you need to build the CLI, run:
+```console
+make build-and-e2e-compose
+```
+
+#### Standalone end-to-end tests suite
+
+To execute the standalone CLI e2e tests, run :
+
+```console
+make e2e-compose-standalone
+```
+
+Or if you need to build the CLI, run:
+
+```console
+make build-and-e2e-compose-standalone
+```
+
+## Releases
+
+To create a new release:
+* Check that the CI is green on the main branch for the commit you want to release
+* Run the release Github Actions workflow with a tag of form vx.y.z following existing tags.
+
+This will automatically create a new tag, release and make binaries for
+Windows, macOS, and Linux available for download on the
+[releases page](https://github.com/docker/compose/releases).
